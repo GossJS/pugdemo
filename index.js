@@ -1,4 +1,6 @@
 import express from 'express';
+import http from 'http';
+import https from 'https';
 import bodyParser from 'body-parser';
 import m from 'mongoose';
 import dot from 'dotenv';
@@ -15,7 +17,12 @@ const app = appSrc(express, bodyParser, fs, CORS, User, UserController);
 
 try {
     await m.connect(URL, { useNewUrlParser: true, useUnifiedTopology: true });
-    app.listen(process.env.PORT ?? 4321);
+    http.Server(app).listen(80);
+    const options = {
+        key: fs.readFileSync( '/etc/letsencrypt/live/pugdemo.kodaktor.ru/privkey.pem'),
+        cert: fs.readFileSync( '/etc/letsencrypt/live/pugdemo.kodaktor.ru/fullchain.pem')
+    };
+    https.Server(options, app).listen(443);
 } catch(e) {
     console.log(e.codeName);
 }
